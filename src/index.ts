@@ -3,9 +3,11 @@ import * as path from "node:path";
 import * as dotenv from "dotenv";
 import {
   ApiBrowse,
+  ApiGetPermissions,
   ApiLogin,
   ApiPing,
   ApiVersion,
+  JsonrpcBaseRequest,
   RequestConfig,
   WebAppBrowse,
 } from "@siemens/simatic-s7-webserver-api";
@@ -56,6 +58,14 @@ function requiredResolved(
   return value;
 }
 
+async function executeWithAuth<T extends JsonrpcBaseRequest>(
+  request: T,
+  authToken: string,
+): Promise<ReturnType<T["execute"]>> {
+  request.token = authToken;
+  return request.execute() as ReturnType<T["execute"]>;
+}
+
 async function main(): Promise<void> {
   const jsonSettings = loadJsonConfig();
 
@@ -98,18 +108,23 @@ async function main(): Promise<void> {
     throw new Error("Login failed. No token returned by PLC.");
   }
 
+  const authToken = login.result;
+
   console.log("Login successful. Token received.");
 
-  const version = await new ApiVersion(config).execute();
+  const permissions = await executeWithAuth(new ApiGetPermissions(config), authToken);
+  console.log("Permissions response:", permissions?.result ?? "unknown");
+
+  const version = await executeWithAuth(new ApiVersion(config), authToken);
   console.log("API version:", version?.result ?? "unknown");
 
-  const ping = await new ApiPing(config).execute();
+  const ping = await executeWithAuth(new ApiPing(config), authToken);
   console.log("Ping response:", ping?.result ?? "unknown");
 
-  const apiBrowse = await new ApiBrowse(config).execute();
+  const apiBrowse = await executeWithAuth(new ApiBrowse(config), authToken);
   console.log("ApiBrowse response:", apiBrowse?.result ?? "unknown");
 
-  const webApps = await new WebAppBrowse(config).execute();
+  const webApps = await executeWithAuth(new WebAppBrowse(config), authToken);
 
   if (!webApps || !webApps.result) {
     console.log("WebAppBrowse returned no results.");
