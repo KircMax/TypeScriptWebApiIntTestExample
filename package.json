@@ -1,0 +1,32 @@
+{
+  "name": "typescriptwebapiinttestexample",
+  "version": "1.0.0",
+  "description": "Basic TypeScript starter for SIMATIC S7 Web API requests",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "tsx src/index.ts",
+    "check": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KircMax/TypeScriptWebApiIntTestExample.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/KircMax/TypeScriptWebApiIntTestExample/issues"
+  },
+  "homepage": "https://github.com/KircMax/TypeScriptWebApiIntTestExample#readme",
+  "dependencies": {
+    "@siemens/simatic-s7-webserver-api": "^1.1.3",
+    "dotenv": "^17.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
+  }
+}
