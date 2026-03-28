@@ -5,6 +5,7 @@ import {
   ApiBrowse,
   ApiGetPermissions,
   ApiLogin,
+  ApiLogout,
   ApiPing,
   ApiVersion,
   JsonrpcBaseRequest,
@@ -112,29 +113,38 @@ async function main(): Promise<void> {
 
   console.log("Login successful. Token received.");
 
-  const permissions = await executeWithAuth(new ApiGetPermissions(config), authToken);
-  console.log("Permissions response:", permissions?.result ?? "unknown");
+  try {
+    const permissions = await executeWithAuth(new ApiGetPermissions(config), authToken);
+    console.log("Permissions response:", permissions?.result ?? "unknown");
 
-  const version = await executeWithAuth(new ApiVersion(config), authToken);
-  console.log("API version:", version?.result ?? "unknown");
+    const version = await executeWithAuth(new ApiVersion(config), authToken);
+    console.log("API version:", version?.result ?? "unknown");
 
-  const ping = await executeWithAuth(new ApiPing(config), authToken);
-  console.log("Ping response:", ping?.result ?? "unknown");
+    const ping = await executeWithAuth(new ApiPing(config), authToken);
+    console.log("Ping response:", ping?.result ?? "unknown");
 
-  const apiBrowse = await executeWithAuth(new ApiBrowse(config), authToken);
-  console.log("ApiBrowse response:", apiBrowse?.result ?? "unknown");
+    const apiBrowse = await executeWithAuth(new ApiBrowse(config), authToken);
+    console.log("ApiBrowse response:", apiBrowse?.result ?? "unknown");
 
-  const webApps = await executeWithAuth(new WebAppBrowse(config), authToken);
+    const webApps = await executeWithAuth(new WebAppBrowse(config), authToken);
 
-  if (!webApps || !webApps.result) {
-    console.log("WebAppBrowse returned no results.");
-    return;
-  }
+    if (!webApps || !webApps.result) {
+      console.log("WebAppBrowse returned no results.");
+      return;
+    }
 
-  console.log("Max applications:", webApps.result.max_applications);
-  console.log("Applications:");
-  for (const app of webApps.result.applications) {
-    console.log("-", app);
+    console.log("Max applications:", webApps.result.max_applications);
+    console.log("Applications:");
+    for (const app of webApps.result.applications) {
+      console.log("-", app);
+    }
+  } finally {
+    try {
+      const logout = await new ApiLogout(config, authToken).execute();
+      console.log("Logout response:", logout?.result ?? "unknown");
+    } catch (logoutError: unknown) {
+      console.error("Logout failed:", logoutError);
+    }
   }
 }
 
