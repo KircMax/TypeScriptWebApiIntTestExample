@@ -78,9 +78,13 @@ async function main(): Promise<void> {
   config.verifyTls = resolved.verifyTls;
 
   if (resolved.verifyTls) {
-    const certPath = requiredResolved("PLC_CERT_PATH or plc.certPath", resolved.certPath);
-    const absoluteCertPath = path.resolve(certPath);
-    config.plcCertificate = fs.readFileSync(absoluteCertPath);
+    if (resolved.certPath && resolved.certPath.trim() !== "") {
+      const absoluteCertPath = path.resolve(resolved.certPath);
+      config.plcCertificate = fs.readFileSync(absoluteCertPath);
+      console.log("TLS verification enabled with configured PLC certificate.");
+    } else {
+      console.log("TLS verification enabled using system trust store (no PLC cert path configured).");
+    }
   }
 
   const login = await new ApiLogin(
